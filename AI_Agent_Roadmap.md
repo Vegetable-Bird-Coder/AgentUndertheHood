@@ -417,7 +417,41 @@ Claude Code 是目前业界最具代表性的 Agentic Coding Tool，它的内部
 - **确定性 Guardrails**：关键操作（文件写入、命令执行、代码提交）用硬编码规则兜底，不依赖模型判断。Hooks / 沙箱 / 权限系统都是这个思路。
 - **配置即代码（Config-as-Code）**：Agent 的行为规范以版本化的文件形式存在于代码仓库中，和代码一起 review、一起演进。
 
-### 4.5.4 实战环节
+### 4.5.4 Harness Engineering：把它们串起来的上位概念
+
+2026 年初，业界出现了一个新术语来统称上述所有实践——**Harness Engineering**（线具工程）。OpenAI 的 Codex 团队用纯 Agent 生成了百万行生产代码，Martin Fowler 在 ThoughtWorks 正式撰文讨论，这个概念迅速成为主流。
+
+**核心公式：`Agent = Model + Harness`**
+
+Harness 就是模型之外的一切——Context 管理、工具编排、Guardrails、反馈循环、可观测性。Philipp Schmid 的类比很到位：模型是 CPU，Context Window 是 RAM，而 **Harness 就是操作系统**。
+
+**与我们 Roadmap 的映射关系**：
+
+```
+Harness Engineering 的组成部分          对应 Roadmap 位置
+──────────────────────────────────     ──────────────────
+Context 管理（注入/选择/压缩/隔离）  ←  M1.3 Context Engineering
+工具编排与 Tool-use Loop             ←  M2.1 Tool-use 机制
+任务规划与状态管理                    ←  M3.2 状态机模式
+确定性 Guardrails（Hooks / 沙箱）    ←  M4.5.1 Hooks + M4.5.3 通用模式
+反馈循环与自愈（Error → Retry）      ←  M3.5 Error Handling / Self-Healing
+持久化指令（CLAUDE.md / Skills）     ←  M4.5.1 Claude Code 架构
+多 Agent 编排                        ←  M5 Multi-Agent
+```
+
+**关键洞察**：Harness Engineering 不是一个需要从头学的新学科——你学完这份 Roadmap，就已经掌握了构建 Harness 的全部核心能力。这个概念的价值在于给你一个**统一的思维框架**，让你在面对任何 Agent 系统时都能问出正确的问题："这个 Agent 的 Harness 是怎么设计的？Context 怎么管？Guardrails 在哪？反馈循环是什么？"
+
+**演进脉络**：
+
+```
+2024: Prompt Engineering  ──▶  写好提示词
+2025: Context Engineering ──▶  管好上下文窗口
+2026: Harness Engineering ──▶  造好模型周围的整个运行环境
+```
+
+每一代不是替代前一代，而是在前一代基础上扩展范围。Prompt Engineering 是 Context Engineering 的子集，Context Engineering 又是 Harness Engineering 的子集。
+
+### 4.5.5 实战环节
 
 - 我们共同拆解你当前的 Claude Code 使用场景，讨论哪些痛点可以通过 Skills / Hooks / CLAUDE.md 优化解决。
 - 我来实现一个自定义 Skill（例如：一个 Go 代码 Review Skill，包含你团队的编码规范），你 Review 并接入你的 Claude Code 环境。
@@ -429,6 +463,9 @@ Claude Code 是目前业界最具代表性的 Agentic Coding Tool，它的内部
 |------|------|------|
 | 📄 官方文档 | [Claude Code Skills Docs](https://code.claude.com/docs/en/skills) | Skills 的权威指南 |
 | 📄 官方文档 | [Claude Code Hooks Docs](https://code.claude.com/docs/en/hooks) | Hooks 的权威指南 |
+| 📄 博客 | [OpenAI: Harness Engineering](https://openai.com/index/harness-engineering/) | OpenAI 官方博文，Codex 团队百万行代码的 Harness 实践 |
+| 📄 博客 | [Martin Fowler: Harness Engineering for Coding Agents](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html) | Guides + Sensors 框架，计算性与推理性控制的分类 |
+| 📄 博客 | [Philipp Schmid: The Importance of Agent Harness](https://www.philschmid.de/agent-harness-2026) | Agent = Model + Harness 的原始阐述 |
 | 💻 GitHub | [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | Claude Code 生态资源大全：Skills、Hooks、插件、工作流 |
 | 💻 GitHub | [claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice) | 社区总结的最佳实践，含 37 条 Tips |
 | 💻 GitHub | [Learn Claude Code (shareAI-Lab)](https://github.com/anthropics/claude-code) | 拆解 Coding Agent 的设计，用几百行 Python 重建核心架构 |
@@ -544,15 +581,13 @@ class AgentMessage:
 
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
-| 2026-04-04 | v1.2 | 新增 M4.5「实践层」：Claude Code 架构拆解、Agentic 工具全景对比、Skills/Hooks 实战 |
-| 2026-04-04 | v1.1 | 新增「协作模式」章节；全文实战环节统一为"讨论驱动 + AI 实现 + 人工审查"模式 |
 | 2026-04-04 | v1.0 | 初始版本，确立五大里程碑和资源列表 |
+| 2026-04-04 | v1.1 | 新增「协作模式」章节；全文实战环节统一为"讨论驱动 + AI 实现 + 人工审查"模式 |
+| 2026-04-04 | v1.2 | 新增 M4.5「实践层」：Claude Code 架构拆解、Agentic 工具全景对比、Skills/Hooks 实战 |
 | 2026-04-04 | v1.3 | 完成 M1.1 实战：纯 HTTP 调用 Anthropic API，验证 Temperature 对确定性/创意任务的影响差异 |
 | 2026-04-04 | v1.3 | 完成 M1.2「Prompt Engineering」：Zero-shot/CoT/Few-shot 三策略对比实验，Go Code Reviewer 实战，结论：Few-shot 格式控制 > 文字约束，生产最优解为两者结合 |
-| 2026-04-04 | v1.4 | 完成 M1.3「Context Window 与 Token 经济学」：
-Tokenizer 效率实验（中文 tok/char 是英文 4.3x）、
-Needle in a Haystack 实验（3K token 下 Lost in the Middle 不显著，
-发现 tool_result 累积是 Agent 场景最大的 context 坑）|
+| 2026-04-04 | v1.4 | 完成 M1.3「Context Window 与 Token 经济学」：Tokenizer 效率实验（中文 tok/char 是英文 4.3x）、Needle in a Haystack 实验（3K token 下 Lost in the Middle 不显著，发现 tool_result 累积是 Agent 场景最大的 context 坑） |
+| 2026-04-04 | v1.5 | M4.5 新增「Harness Engineering」章节：建立 Agent=Model+Harness 概念映射，串联 Roadmap 全部理论，补充 OpenAI/Fowler/Schmid 三大核心参考 |
 
 ---
 
