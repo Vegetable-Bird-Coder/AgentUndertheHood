@@ -1,14 +1,259 @@
 [
   {
-    "id": "f_1775460162_c3bb1255",
-    "content": "用户是 Go 开发者，住在杭州",
+    "id": "f_1772359200_07da56b9",
+    "content": "用户主要使用 Go 和 C++ 进行后端开发",
     "tags": [
-      "编程语言",
-      "职业",
-      "城市",
-      "背景"
+      "语言",
+      "职业"
     ],
-    "timestamp": "2026-04-06T07:22:42.590480+00:00",
+    "timestamp": "2026-03-01T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1772532000_79f9275e",
+    "content": "用户有约 1 年后端开发经验",
+    "tags": [
+      "经验",
+      "职业"
+    ],
+    "timestamp": "2026-03-03T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1772704800_c43b5763",
+    "content": "用户住在杭州",
+    "tags": [
+      "城市",
+      "位置"
+    ],
+    "timestamp": "2026-03-05T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1772877600_7703211f",
+    "content": "用户目前在学习 AI Agent 开发",
+    "tags": [
+      "学习",
+      "目标"
+    ],
+    "timestamp": "2026-03-07T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773050400_0db1dd48",
+    "content": "用户的长期目标是转型为 AI Agent 研发工程师",
+    "tags": [
+      "目标",
+      "职业规划"
+    ],
+    "timestamp": "2026-03-09T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773223200_b69bad97",
+    "content": "用户已完成 M1.1：LLM API 底层机制",
+    "tags": [
+      "进度",
+      "M1"
+    ],
+    "timestamp": "2026-03-11T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773396000_3d2f8ac1",
+    "content": "用户已完成 M1.2：Prompt Engineering 实战",
+    "tags": [
+      "进度",
+      "M1"
+    ],
+    "timestamp": "2026-03-13T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773568800_b56cabc3",
+    "content": "用户已完成 M1.3：Context Window 与 Token 经济学",
+    "tags": [
+      "进度",
+      "M1"
+    ],
+    "timestamp": "2026-03-15T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773741600_e5e15b18",
+    "content": "用户已完成 M2.1：Tool-use 机制",
+    "tags": [
+      "进度",
+      "M2"
+    ],
+    "timestamp": "2026-03-17T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1773914400_0a901827",
+    "content": "用户已完成 M2.2：Planning 机制",
+    "tags": [
+      "进度",
+      "M2"
+    ],
+    "timestamp": "2026-03-19T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774087200_7c33c950",
+    "content": "用户偏好第一性原理学习方式，不喜欢黑盒封装",
+    "tags": [
+      "学习方式",
+      "偏好"
+    ],
+    "timestamp": "2026-03-21T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774260000_7caed613",
+    "content": "用户倾向于先理解架构再看代码实现",
+    "tags": [
+      "学习方式",
+      "偏好"
+    ],
+    "timestamp": "2026-03-23T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774432800_00520596",
+    "content": "用户有 MCP 配置使用经验",
+    "tags": [
+      "工具",
+      "经验"
+    ],
+    "timestamp": "2026-03-25T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774605600_c2d1f4d0",
+    "content": "用户使用 Python 但仅基础语法，需要 Python 插播讲解",
+    "tags": [
+      "语言",
+      "Python"
+    ],
+    "timestamp": "2026-03-27T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774778400_fb8216a4",
+    "content": "用户已理解 Tool-use Loop 的核心：模型输出 JSON，Host 执行",
+    "tags": [
+      "概念",
+      "Tool-use"
+    ],
+    "timestamp": "2026-03-29T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1774951200_c4db1a70",
+    "content": "parallel tool calling：模型自动并行独立工具，串行依赖工具",
+    "tags": [
+      "概念",
+      "Tool-use",
+      "实验结论"
+    ],
+    "timestamp": "2026-03-31T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775124000_320b629f",
+    "content": "stream=False 返回完整 JSON dict，stream=True 返回 SSE 序列",
+    "tags": [
+      "概念",
+      "API",
+      "实验结论"
+    ],
+    "timestamp": "2026-04-02T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775296800_0453b303",
+    "content": "tool_result 累积是 Agent 场景最大的 context 消耗来源",
+    "tags": [
+      "概念",
+      "context",
+      "实验结论"
+    ],
+    "timestamp": "2026-04-04T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775469600_213594a8",
+    "content": "M2.2 设计原则：规划层用 LLM，执行层用代码，不混用",
+    "tags": [
+      "概念",
+      "planning",
+      "实验结论"
+    ],
+    "timestamp": "2026-04-06T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775642400_4e8cd09b",
+    "content": "validate_plan fail fast：在执行前做四项结构校验",
+    "tags": [
+      "概念",
+      "planning"
+    ],
+    "timestamp": "2026-04-08T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775815200_342881aa",
+    "content": "用户正在学习 M2.3：Memory 机制",
+    "tags": [
+      "进度",
+      "M2",
+      "当前"
+    ],
+    "timestamp": "2026-04-10T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1775988000_7507ed19",
+    "content": "Memory 三类：Episodic（对话历史）/ Semantic（事实）/ Procedural（规范）",
+    "tags": [
+      "概念",
+      "memory"
+    ],
+    "timestamp": "2026-04-12T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1776160800_3869e164",
+    "content": "ConversationBuffer 按 token 数触发压缩，而非按条数",
+    "tags": [
+      "概念",
+      "memory",
+      "实验结论"
+    ],
+    "timestamp": "2026-04-14T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1776333600_8d1e7ebc",
+    "content": "FactStore 使用 OR 语义关键词检索，高召回低精度",
+    "tags": [
+      "概念",
+      "memory"
+    ],
+    "timestamp": "2026-04-16T10:00:00+00:00",
+    "embedding": null
+  },
+  {
+    "id": "f_1776506400_35e94b75",
+    "content": "as_context_string 只注入最近 20 条，超出部分靠 recall_facts 检索",
+    "tags": [
+      "概念",
+      "memory",
+      "当前"
+    ],
+    "timestamp": "2026-04-18T10:00:00+00:00",
     "embedding": null
   }
 ]

@@ -306,23 +306,33 @@ class FactStore:
         """返回所有 facts（用于调试和全量注入 context 场景）。"""
         return list(self._facts)
 
-    def as_context_string(self) -> str:
+    def as_context_string(self, max_facts: int = 20) -> str:
         """
-        把所有 facts 格式化成可读字符串，用于注入 System Prompt。
+        把最近 max_facts 条 facts 格式化成字符串，注入 System Prompt。
 
-        格式示例：
-          [已知事实]
-          - 用户是 Go/C++ 开发者 (标签: 语言, 背景)
-          - 用户偏好城市是北京 (标签: 偏好)
+        只注入最近的 N 条（热数据），超出部分靠模型主动调用 recall_facts 检索。
+        这样两个机制分工清晰：
+          - as_context_string : 自动注入，免检索，适合高频/近期信息
+          - recall_facts      : 按需检索，适合低频/历史信息
+
+        max_facts 的选取经验值：
+          20 条 × 平均 30 token/条 ≈ 600 tokens，对 context 压力可接受。
         """
         if not self._facts:
             return ""
 
-        lines = ["[已知事实]"]
-        # 按时间顺序显示（最早的在前，符合阅读习惯）
-        for f in sorted(self._facts, key=lambda x: x["timestamp"]):
+        # 按时间排序，取最近的 max_facts 条
+        recent = sorted(self._facts, key=lambda x: x["timestamp"])[-max_facts:]
+        total  = len(self._facts)
+        hidden = total - len(recent)   # 未注入的条数，告知模型去检索
+
+        lines = [f"[已知事实（显示最近 {len(recent)} 条，共 {total} 条）]"]
+        for f in recent:
             tag_str = ", ".join(f["tags"]) if f["tags"] else "无标签"
             lines.append(f"  - {f['content']} (标签: {tag_str})")
+
+        if hidden > 0:
+            lines.append(f"  （另有 {hidden} 条较早的记忆未显示，可用 recall_facts 检索）")
 
         return "\n".join(lines)
 
@@ -475,6 +485,8 @@ def build_system_prompt(buffer: ConversationBuffer, fact_store: FactStore) -> st
         "  - recall_facts：从长期记忆中检索信息\n"
         "当用户透露个人信息或重要偏好时，主动调用 save_fact 保存。\n"
         "当用户询问你之前了解的信息时，先调用 recall_facts 检索再回答。\n"
+        "System Prompt 里的已知事实只显示最近一部分，"
+        "如果需要更早的记忆请主动调用 recall_facts。\n"
         "用中文回答，语言自然友好。",
     ]
 
