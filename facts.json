@@ -255,5 +255,16 @@
     ],
     "timestamp": "2026-04-18T10:00:00+00:00",
     "embedding": null
+  },
+  {
+    "id": "f_1775478379_834c6fa1",
+    "content": "用户最近开始用 uv 管理 Python 项目",
+    "tags": [
+      "工具",
+      "Python",
+      "项目管理"
+    ],
+    "timestamp": "2026-04-06T12:26:19.430259+00:00",
+    "embedding": null
   }
 ]

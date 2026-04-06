@@ -18,6 +18,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 
+import jieba
 import requests
 import tiktoken
 
@@ -273,23 +274,35 @@ class FactStore:
         self._persist()
         return fact
 
+    def _tokenize(self, text: str) -> list[str]:
+        """
+        中文用 jieba 分词，英文按空格分词，结果合并去重。
+
+        为什么不直接 split()：
+        中文没有空格分隔词，split() 对中文整句不切分，
+        导致整个 query 变成一个 token，几乎不可能在 fact 里完整出现。
+
+        jieba.cut 对中英文混合文本都能处理：
+          "用户背景信息" → ["用户", "背景", "信息"]
+          "Go developer" → ["Go", " ", "developer"]（空格会被过滤）
+
+        cut_all=False：精确模式（默认），比全模式噪声少。
+        """
+        tokens = [t.strip() for t in jieba.cut(text.lower(), cut_all=False)]
+        return list(set(t for t in tokens if t))   # 去重 + 过滤空字符串
+
     def recall(self, query: str, top_k: int = 5) -> list[dict]:
         """
-        关键词检索：把 query 按空格拆成词，在 content + tags 里匹配。
+        关键词检索：用 jieba 把 query 切词，在 content + tags 里匹配。
         返回命中的 facts，按时间倒序（最近的在前）。
 
-        匹配逻辑：query 中任意一个词命中，就算相关。
-        这是 OR 语义，比 AND 更宽松——宁可多返回，不要漏掉。
-
-        🐍 Python 插播：列表推导式 + any()
-          [f for f in self._facts if any(w in f["content"] for w in words)]
-          类比 Go 里的 for 循环 + 内层 for 循环 + break，但更简洁。
-          any() 是短路求值：只要找到一个 True 就立刻返回，不继续遍历。
+        匹配逻辑：query 中任意一个词命中，就算相关（OR 语义）。
+        宁可多返回，不要漏掉——模型做最终筛选。
         """
         if not query.strip():
             return []
 
-        words = query.lower().split()
+        words = self._tokenize(query)
 
         def matches(fact: dict) -> bool:
             # 在 content 和 tags 里搜索（都转成小写做大小写不敏感匹配）
@@ -402,7 +415,7 @@ MEMORY_TOOLS = [
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "检索关键词，如'用户语言背景'、'偏好城市'",
+                    "description": "检索关键词，用空格分隔多个词，如'用户 语言 背景'、'偏好 城市'。不要用完整句子。",
                 },
             },
             "required": ["query"],
