@@ -589,6 +589,7 @@ class AgentMessage:
 | 2026-04-04 | v1.4 | 完成 M1.3「Context Window 与 Token 经济学」：Tokenizer 效率实验（中文 tok/char 是英文 4.3x）、Needle in a Haystack 实验（3K token 下 Lost in the Middle 不显著，发现 tool_result 累积是 Agent 场景最大的 context 坑） |
 | 2026-04-04 | v1.5 | M4.5 新增「Harness Engineering」章节：建立 Agent=Model+Harness 概念映射，串联 Roadmap 全部理论，补充 OpenAI/Fowler/Schmid 三大核心参考 |
 | 2026-04-05 | v1.6 | 完成 M2.1「Tool-use 机制」：实现完整 Tool-use Loop（工具注册表 + 错误分类 + Parallel Tool Use），实验验证模型自动并行调用独立工具、串行调用依赖工具；厘清 stream=False vs stream=True 两种响应结构（content blocks / SSE 事件序列）；确立错误处理两道防线：Tool Description 过滤无效调用，execute_tool 返回 error dict 处理运行时错误 |
+| 2026-04-06 | v1.7 | 完成 M2.2「Planning 机制」：实现显式计划生成（JSON 结构化 plan）、validate_plan（fail fast 四项校验）、交互式 review_plan（人工审批节点，支持多轮修改）、代码驱动 execute_plan（执行阶段 0 次 LLM 调用）、summarize（唯一结尾 LLM 调用）；厘清规划层/执行层信息隔离原则；验证"传给模型信息越精确幻觉越少"；修复 markdown JSON 包裹、task 与 plan 不一致导致的幻觉问题 |
 
 ---
 
