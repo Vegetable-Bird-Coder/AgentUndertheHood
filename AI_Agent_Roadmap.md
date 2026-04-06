@@ -590,6 +590,7 @@ class AgentMessage:
 | 2026-04-04 | v1.5 | M4.5 新增「Harness Engineering」章节：建立 Agent=Model+Harness 概念映射，串联 Roadmap 全部理论，补充 OpenAI/Fowler/Schmid 三大核心参考 |
 | 2026-04-05 | v1.6 | 完成 M2.1「Tool-use 机制」：实现完整 Tool-use Loop（工具注册表 + 错误分类 + Parallel Tool Use），实验验证模型自动并行调用独立工具、串行调用依赖工具；厘清 stream=False vs stream=True 两种响应结构（content blocks / SSE 事件序列）；确立错误处理两道防线：Tool Description 过滤无效调用，execute_tool 返回 error dict 处理运行时错误 |
 | 2026-04-06 | v1.7 | 完成 M2.2「Planning 机制」：实现显式计划生成（JSON 结构化 plan）、validate_plan（fail fast 四项校验）、交互式 review_plan（人工审批节点，支持多轮修改）、代码驱动 execute_plan（执行阶段 0 次 LLM 调用）、summarize（唯一结尾 LLM 调用）；厘清规划层/执行层信息隔离原则；验证"传给模型信息越精确幻觉越少"；修复 markdown JSON 包裹、task 与 plan 不一致导致的幻觉问题 |
+| 2026-04-06 | v1.8 | 完成 M2.3「Memory 机制」：实现 ConversationBuffer（按 token 触发压缩、滚动摘要窗口 MAX_SUMMARY_CHUNKS=3）和 FactStore（持久化 JSON、关键词 OR 检索、预留 embedding 字段）；厘清 as_context_string（热数据自动注入，max_facts=20）与 recall_facts（冷数据按需检索）的分工边界；确立三层检索架构：L1全量注入 → L2关键词检索 → L3向量检索（M3覆盖）；工厂函数+闭包实现依赖注入，替代全局变量 |
 
 ---
 
