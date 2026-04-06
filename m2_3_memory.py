@@ -75,6 +75,10 @@ def send_request(
 # 超过这个数字，把最早的一半对话压缩成摘要
 MAX_BUFFER_TOKENS = 2000
 
+# 滚动摘要窗口大小：只保留最近 K 次压缩的摘要块
+# 超出后丢弃最早的块（方案 C），未来可升级为 recursive summarization（方案 B）
+MAX_SUMMARY_CHUNKS = 3
+
 # 压缩时调用 LLM 生成摘要，用这个 system prompt
 _COMPRESSOR_SYSTEM = """你是一个对话摘要器。
 将以下对话历史压缩成一段简洁的摘要，保留所有关键信息：用户的问题、助手的回答要点、提到的关键事实。
@@ -96,7 +100,8 @@ class ConversationBuffer:
 
     def __init__(self):
         self._messages: list[dict] = []
-        self._summary: str = ""          # 历史摘要，初始为空
+        self._summary_chunks: list[str] = []  # 滚动摘要块列表
+        self._summary: str = ""               # 合并后的摘要字符串，注入 System Prompt
 
     # ── 公开接口 ─────────────────────────────────────────────────────────────
 
@@ -130,25 +135,44 @@ class ConversationBuffer:
 
     # ── 内部实现 ──────────────────────────────────────────────────────────────
 
+    def _find_split_index(self) -> int:
+        """
+        找到 token 累计恰好覆盖总量 50% 的分割点。
+
+        按 token 累计而非条数，避免"压缩了很多条但 token 很少"的无效压缩。
+        类比 Go 里按字节而非行数做 buffer flush（bufio.Writer 的策略）。
+
+        返回值：压缩 [0:idx]，保留 [idx:]
+        """
+        total  = self.total_tokens()
+        target = total // 2
+        accumulated = 0
+
+        for i, m in enumerate(self._messages):
+            accumulated += count_tokens(
+                m["content"] if isinstance(m["content"], str)
+                else json.dumps(m["content"], ensure_ascii=False)
+            )
+            if accumulated >= target:
+                return i + 1   # 压缩到第 i 条（含），保留第 i+1 条起
+
+        return max(1, len(self._messages) // 2)   # fallback：至少压缩1条
+
     def _compress_if_needed(self) -> None:
         """
-        如果 buffer 超过阈值，把前一半消息压缩成摘要，只保留后一半。
-
-        为什么是"前一半"而不是"最早的几条"？
-        保证压缩比例稳定：无论对话多长，压缩后 buffer 大小都回到阈值的约 50%，
-        不会因为"压缩了 2 条但每条都很长"而导致压缩效果不稳定。
+        如果 buffer 超过阈值，把前 ~50% token 的消息压缩成摘要，保留其余部分。
 
         🐍 Python 插播：列表切片
-        self._messages[:mid]  → 前一半（待压缩）
-        self._messages[mid:]  → 后一半（保留）
+        self._messages[:mid]  → 前半（待压缩）
+        self._messages[mid:]  → 后半（保留）
         类比 Go 的 slice[0:mid] 和 slice[mid:]，语法完全一致。
         """
         if self.total_tokens() <= MAX_BUFFER_TOKENS:
             return
 
-        mid = len(self._messages) // 2
+        mid = self._find_split_index()   # ← 按 token 找分割点（修复后）
         if mid == 0:
-            return   # 只有1条消息时不压缩，避免死循环
+            return
 
         to_compress = self._messages[:mid]
         to_keep     = self._messages[mid:]
@@ -157,12 +181,13 @@ class ConversationBuffer:
 
         new_summary = self._summarize(to_compress)
 
-        # 把新摘要和已有摘要合并
-        # 如果已有摘要，新摘要追加在后面（时间顺序）
-        if self._summary:
-            self._summary = self._summary + "\n" + new_summary
-        else:
-            self._summary = new_summary
+        # 方案 C：滚动窗口，只保留最近 MAX_SUMMARY_CHUNKS 次压缩的摘要
+        # 代价：丢失早期对话信息
+        # 替代方案（未来可升级）：方案 B recursive summarization
+        self._summary_chunks.append(new_summary)
+        if len(self._summary_chunks) > MAX_SUMMARY_CHUNKS:
+            self._summary_chunks.pop(0)   # 丢弃最早的一块
+        self._summary = "\n---\n".join(self._summary_chunks)
 
         self._messages = to_keep
         print(f"  [Buffer] 压缩完成，保留 {len(self._messages)} 条，摘要长度：{len(self._summary)} 字符")
