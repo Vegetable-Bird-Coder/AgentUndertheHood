@@ -290,8 +290,17 @@ def _exec_get_weather(city: str) -> dict:
     if city not in _WEATHER_DB:
         raise ValueError(f"不支持的城市：{city}。支持：{list(_WEATHER_DB.keys())}")
     d = _WEATHER_DB[city]
-    return {"city": city, "temp": d["temp"], "condition": d["condition"],
-            "humidity": d["humidity"], "unit": "celsius"}
+    # status 与业务数据平级（方案 B）：
+    # compare_weather 收到 weather_a 时可以直接访问 weather_a["condition"]，
+    # 不需要先解包 weather_a["result"]["condition"]——两个工具互相解耦
+    return {
+        "status":    "ok",
+        "city":      city,
+        "temp":      d["temp"],
+        "condition": d["condition"],
+        "humidity":  d["humidity"],
+        "unit":      "celsius",
+    }
 
 
 def _exec_compare_weather(city_a, city_b, weather_a, weather_b) -> dict:
@@ -305,7 +314,13 @@ def _exec_compare_weather(city_a, city_b, weather_a, weather_b) -> dict:
     if sa > sb:   rec, reason = city_a, f"{city_a}更适宜（{sa} vs {sb}分）"
     elif sb > sa: rec, reason = city_b, f"{city_b}更适宜（{sb} vs {sa}分）"
     else:         rec, reason = "两城市相当", f"评分相同（均 {sa} 分）"
-    return {"recommendation": rec, "reason": reason, "score_a": sa, "score_b": sb}
+    return {
+        "status":         "ok",
+        "recommendation": rec,
+        "reason":         reason,
+        "score_a":        sa,
+        "score_b":        sb,
+    }
 
 
 _WEATHER_IMPL = {
@@ -465,12 +480,9 @@ class ToolRegistry:
             return {"status": "error",
                     "message": f"未知工具：{name}。可用：{list(self._impl_map.keys())}"}
         try:
-            result = self._impl_map[name](**input_data)
-            # 实现函数可能直接返回结果 dict，也可能已经带 status 字段
-            # 统一包装成 {"status": "ok", "result": ...} 格式
-            if isinstance(result, dict) and "status" in result:
-                return result   # 记忆工具已经自带 status，直接透传
-            return {"status": "ok", "result": result}
+            # 所有实现函数都遵循统一契约：返回带 status 字段的 dict
+            # execute() 作为路由层，无脑透传，不感知各模块的内部格式
+            return self._impl_map[name](**input_data)
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
