@@ -577,6 +577,44 @@ class AgentMessage:
 
 ---
 
+## 🔗 持续对齐机制：边学基础，边看前沿
+
+> 学底层不等于闭门造车。以下习惯确保你在打地基的同时，始终知道业界在发生什么。
+
+**每周 30 分钟：前沿扫描**
+
+关注 2-3 个高信噪比信息源即可，不求多求精：
+
+| 信息源 | 说明 |
+|--------|------|
+| [Anthropic Engineering Blog](https://www.anthropic.com/engineering) | 第一手的 Agent 构建理念和 Context Engineering 实践 |
+| [OpenAI Blog - Engineering](https://openai.com/index/) | Harness Engineering、Codex 架构等前沿实践 |
+| [Simon Willison's Blog](https://simonwillison.net/) | AI 工程领域最高质量的独立评论，每篇都值得读 |
+
+**每节课结束时：一句话"桥接"**
+
+导师在每节课结束的迭代日志中，会附带一句「前沿连接」，把刚学的底层概念和当前业界热点做关联。例如：
+
+- 学完 M2.1 Tool-use → "Claude Code 源码中的 `tool_executor.py` 就是这个 Loop 的产品级实现"
+- 学完 M3.2 状态机 → "Cursor 的 Agent Mode 本质上是一个带 retry 和 human-in-the-loop 的 FSM"
+
+**核心心态：T 型学习**
+
+广度（每周 30min 扫描）和深度（Roadmap 主线）不冲突，反而互相加速：
+```
+广度（每周 30min 扫描前沿）
+━━━━━━━━━━━━━━━━━━━━━━━━
+         ┃
+         ┃  深度（Roadmap 主线学习）
+         ┃
+         ┃
+         ┃
+```
+
+横向保持信息灵敏度，纵向保持学习深度。你扫描到的新概念会不断印证"我学的这些基础原来被用在了这里"，而基础越扎实，扫描时的信息吸收率越高。
+
+---
+
 ## 🔄 Roadmap 迭代日志
 
 | 日期 | 版本 | 变更内容 |
@@ -592,6 +630,7 @@ class AgentMessage:
 | 2026-04-06 | v1.7 | 完成 M2.2「Planning 机制」：实现显式计划生成（JSON 结构化 plan）、validate_plan（fail fast 四项校验）、交互式 review_plan（人工审批节点，支持多轮修改）、代码驱动 execute_plan（执行阶段 0 次 LLM 调用）、summarize（唯一结尾 LLM 调用）；厘清规划层/执行层信息隔离原则；验证"传给模型信息越精确幻觉越少"；修复 markdown JSON 包裹、task 与 plan 不一致导致的幻觉问题 |
 | 2026-04-06 | v1.8 | 完成 M2.3「Memory 机制」：实现 ConversationBuffer（按 token 触发压缩、滚动摘要窗口 MAX_SUMMARY_CHUNKS=3）和 FactStore（持久化 JSON、关键词 OR 检索、预留 embedding 字段）；厘清 as_context_string（热数据自动注入，max_facts=20）与 recall_facts（冷数据按需检索）的分工边界；确立三层检索架构：L1全量注入 → L2关键词检索 → L3向量检索（M3覆盖）；工厂函数+闭包实现依赖注入，替代全局变量 |
 | 2026-04-08 | v1.9 | 完成 M2.4「Mini Agent 综合实战」：实现 ToolRegistry（分模块注册 + 统一执行接口）；确立工具接口契约：所有实现函数返回带 status 的扁平 dict，路由层无脑透传不感知内部格式；天气工具采用方案 B（扁平结构）避免 compare_weather 感知 get_weather 返回格式；Planning 内化到 System Prompt（轻量化，无审批节点）；验证跨对话记忆持久化、recall_facts 主动触发、tool description 过滤无效调用等核心机制均符合预期 |
+| 2026-04-08 | v2.0 | 新增「持续对齐机制」：前沿扫描信息源 + T 型学习策略，解决"学基础是否会落伍"的焦虑 |
 
 ---
 
