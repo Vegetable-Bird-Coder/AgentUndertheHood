@@ -407,23 +407,50 @@ class FSMAgent:
 4. 如果任务不需要调用任何工具（如简单问候），输出空数组 []
 {retry_context}"""
 
-        response = send_request(
-            messages=[{"role": "user", "content": user_request}],
-            system=system,
-            temperature=0.0,
-        )
+        # ★ Self-healing Loop：最多尝试 2 次，专门修复格式问题。
+        # 职责边界：只修"输出了不合法 JSON"这种格式错误。
+        # "计划本身不够好"（意图问题）由外层 FSM 的 EVALUATING + 重规划处理。
+        messages = [{"role": "user", "content": user_request}]
+        plan = None
+        raw_text = ""
 
-        raw_text = "".join(
-            b.get("text", "") for b in response.get("content", [])
-            if b.get("type") == "text"
-        )
+        for attempt in range(2):
+            response = send_request(
+                messages=messages,
+                system=system,
+                temperature=0.0,
+            )
+            raw_text = "".join(
+                b.get("text", "") for b in response.get("content", [])
+                if b.get("type") == "text"
+            )
+            plan = extract_json(raw_text)
 
-        plan = extract_json(raw_text)
+            if isinstance(plan, list):
+                break   # 解析成功，退出循环
 
-        # 容错：如果解析失败，用空计划（让 EVALUATING 判断是否满足需求）
+            # 第一次失败：把错误输出反馈给模型，要求重新生成
+            if attempt == 0:
+                print(f"  ⚠️  计划解析失败（第1次），尝试格式修复...")
+                print(f"     原始输出：{raw_text[:100]}...")
+                # 把失败的 assistant 输出 + 纠错 user 消息追加进去
+                # 🐍 Python 插播：列表 + 列表 = 新列表（不修改原列表）
+                messages = messages + [
+                    {"role": "assistant", "content": raw_text},
+                    {"role": "user",      "content": (
+                        "你的输出无法被解析为 JSON。"
+                        "请严格按照格式要求重新输出，只输出 JSON 数组，"
+                        "不要包含任何解释文字或 markdown 代码块。"
+                    )},
+                ]
+
+        # 两次都失败：标记原因，让 EVALUATING 触发重规划而非静默跳过
         if not isinstance(plan, list):
-            print(f"  ⚠️  计划解析失败，原始输出：{raw_text[:200]}")
+            print(f"  ❌  计划解析连续失败，标记为 parse_failed")
             plan = []
+            self.ctx["plan_empty_reason"] = "parse_failed"
+        else:
+            self.ctx["plan_empty_reason"] = "no_tool_needed"
 
         self.ctx["plan"] = plan
         self._log_plan(plan)
@@ -487,10 +514,17 @@ class FSMAgent:
         user_request = self.ctx["user_request"]
         tool_results = self.ctx.get("tool_results", [])
 
-        # 如果没有工具调用结果，且任务是简单问候类，直接通过
+        # 空工具结果：区分"真的不需要工具"和"解析失败导致的空计划"
         if not tool_results:
-            self.ctx["evaluation_passed"] = True
-            self.ctx["evaluation_reason"] = "无需工具调用，直接响应"
+            if self.ctx.get("plan_empty_reason") == "parse_failed":
+                # 解析失败伪装成空计划——触发重规划，不能放行
+                self.ctx["evaluation_passed"] = False
+                self.ctx["evaluation_reason"] = "计划生成失败（JSON 解析错误），需要重新规划"
+                print("  ❌ 评估结果：未通过（计划解析失败，触发重规划）")
+            else:
+                # 真的不需要工具（问候、闲聊等）——直接放行
+                self.ctx["evaluation_passed"] = True
+                self.ctx["evaluation_reason"] = "无需工具调用，直接响应"
             return
 
         system = """你是一个结果评估器。
