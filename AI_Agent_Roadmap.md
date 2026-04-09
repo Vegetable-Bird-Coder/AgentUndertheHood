@@ -631,6 +631,7 @@ class AgentMessage:
 | 2026-04-06 | v1.8 | 完成 M2.3「Memory 机制」：实现 ConversationBuffer（按 token 触发压缩、滚动摘要窗口 MAX_SUMMARY_CHUNKS=3）和 FactStore（持久化 JSON、关键词 OR 检索、预留 embedding 字段）；厘清 as_context_string（热数据自动注入，max_facts=20）与 recall_facts（冷数据按需检索）的分工边界；确立三层检索架构：L1全量注入 → L2关键词检索 → L3向量检索（M3覆盖）；工厂函数+闭包实现依赖注入，替代全局变量 |
 | 2026-04-08 | v1.9 | 完成 M2.4「Mini Agent 综合实战」：实现 ToolRegistry（分模块注册 + 统一执行接口）；确立工具接口契约：所有实现函数返回带 status 的扁平 dict，路由层无脑透传不感知内部格式；天气工具采用方案 B（扁平结构）避免 compare_weather 感知 get_weather 返回格式；Planning 内化到 System Prompt（轻量化，无审批节点）；验证跨对话记忆持久化、recall_facts 主动触发、tool description 过滤无效调用等核心机制均符合预期 |
 | 2026-04-08 | v2.0 | 新增「持续对齐机制」：前沿扫描信息源 + T 型学习策略，解决"学基础是否会落伍"的焦虑 |
+| 2026-04-08 | v2.1 | 完成 M3.1「ReAct 范式」：实现 ReAct Agent（extract_thinking 正则解析、Thought/Action/Observation 三段式日志）；对比实验验证 ReAct 是 Prompt 层改造而非架构重写；厘清两个认知修正：① extract_thinking 应用 findall 合并多块；② thinking 不存入最终回答的真实原因是"调试信息不属于对话内容"而非"格式污染"；确认 ReAct 核心价值是决策可审计性而非结果质量提升 |
 
 ---
 
