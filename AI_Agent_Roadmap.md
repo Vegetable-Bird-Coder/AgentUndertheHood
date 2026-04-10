@@ -633,6 +633,7 @@ class AgentMessage:
 | 2026-04-08 | v2.0 | 新增「持续对齐机制」：前沿扫描信息源 + T 型学习策略，解决"学基础是否会落伍"的焦虑 |
 | 2026-04-08 | v2.1 | 完成 M3.1「ReAct 范式」：实现 ReAct Agent（extract_thinking 正则解析、Thought/Action/Observation 三段式日志）；对比实验验证 ReAct 是 Prompt 层改造而非架构重写；厘清两个认知修正：① extract_thinking 应用 findall 合并多块；② thinking 不存入最终回答的真实原因是"调试信息不属于对话内容"而非"格式污染"；确认 ReAct 核心价值是决策可审计性而非结果质量提升 |
 | 2026-04-09 | v2.2 | 完成 M3.2「状态机模式」：实现 FSMAgent（5状态 PLANNING→EXECUTING→EVALUATING→RESPONDING→DONE/FAILED）；确立三项架构决策：静态dict+条件函数混合转移表、Handler dict（开闭原则）、共享ctx传递跨状态数据；EXECUTING阶段零LLM调用（结构化JSON plan驱动）；EVALUATING为唯一条件分叉点（确定性代码控制重试/失败，非确定性LLM判断结果质量）；新增Self-healing Loop修复计划JSON解析失败（格式问题内部修复，意图问题交外层FSM）；区分plan_empty_reason防止解析失败伪装成空计划静默通过；厘清胖工具vs瘦工具取舍，及API层约束vs Prompt层约束的本质差异 |
+| 2026-04-10 | v2.3 | 完成 M3.3「反思机制」：实现 ReflectionAgent（装饰器 B-1 方案，包装任意 callable）；ReflectionStore 独立于 FactStore，去掉 task_type 字段直接在 lesson 全文检索；合并 distill_lesson + revise 为单次 JSON 调用减少 API 开销；Extended Thinking 通过启发式规则触发（推理关键词 + token 阈值 + force flag）；实验验证：历史教训在第二次比较类任务中命中并注入，Draft 直接达标跳过修订；Extended Thinking 在"带老人旅游"任务中发现普通 Critique 遗漏的多维度分析问题；确立两个核心局限：① 教训注入对复杂 inner_fn（FSMAgent）效果有限（接口解耦的代价）；② 输出反思无法审查过程质量（Critic 看不到工具调用原始数据） |
 
 ---
 
