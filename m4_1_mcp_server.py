@@ -137,6 +137,7 @@ def tool_execute_python(arguments: dict) -> dict:
     try:
         result = subprocess.run(
             [sys.executable, "-c", code],  # sys.executable = 当前 Python 解释器路径
+            cwd=WORKSPACE_DIR,
             capture_output = True,          # 捕获 stdout 和 stderr
             text           = True,          # 返回字符串而不是 bytes
             timeout        = PYTHON_TIMEOUT,
